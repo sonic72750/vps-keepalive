@@ -1,5 +1,6 @@
 from flask import Flask, request
 from datetime import datetime
+import pytz
 import os
 import subprocess
 
@@ -9,7 +10,8 @@ LOG_FILE = "/home/ubuntu/keepalive/keepalive.log"
 
 @app.route('/ping', methods=['GET'])
 def ping():
-    now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    tz = pytz.timezone('Asia/Taipei')
+    now = datetime.now(tz).strftime('%Y-%m-%d %H:%M:%S %Z%z')
     ip = request.remote_addr
     ua = request.headers.get("User-Agent", "")
     query = request.query_string.decode()
@@ -24,7 +26,7 @@ def ping():
 
     return f"Keepalive OK - {now}\n"
 
-@app.route('/push', methods=['POST'])
+@app.route('/push', methods=['GET', 'POST'])
 def push_to_git():
 
     cmd = "cd /home/ubuntu/keepalive && git add keepalive.log && git commit -m 'Auto update' && git push origin main"
